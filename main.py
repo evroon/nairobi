@@ -16,6 +16,7 @@ gnt.set_yticks(np.arange(len(bays)) + 0.5)
 gnt.set_yticklabels(bays)
 gnt.grid(True) 
 
+# Plot Gantt diagram
 for i, eta in enumerate(flight_info):
     gnt.broken_barh([(eta, 1)], (i%len(bays), 1), facecolors =('tab:blue'))
 
