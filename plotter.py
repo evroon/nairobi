@@ -15,6 +15,11 @@ gnt.set_ylabel('Bay')
 
 gnt.set_yticks(np.arange(len(model.bays)) + 0.5)
 gnt.set_yticklabels(model.bays)
+
+time_ticks = [str(x) + ':00' for x in np.arange(0, 24)]
+gnt.set_xticks(np.arange(0, 24))
+gnt.set_xticklabels(time_ticks)
+
 gnt.grid(True)
 
 cmap = plt.cm.get_cmap('Spectral')
