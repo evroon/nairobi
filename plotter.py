@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import model
 
 
-eta, etd, flight_count = model.get_flight_info()
+eta, etd, flight_count = model.get_basic_flight_info()
 callsigns = model.get_callsigns()
 
 fig, gnt = plt.subplots(figsize=(18, 16))

@@ -19,7 +19,7 @@ def calc_overlap_matrix():
         print('Loaded overlap_matrix.csv from cache')
         return np.loadtxt('data/overlap_matrix.csv', delimiter=';')
 
-    eta, etd, flight_count = model.get_flight_info()
+    eta, etd, flight_count = model.get_basic_flight_info()
     C = np.zeros((flight_count, flight_count), dtype=int)
 
     for i in range(flight_count):
