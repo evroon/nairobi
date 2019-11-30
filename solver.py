@@ -15,10 +15,11 @@ Overlap matrix Cij: 1 if aircraft i and j are at the airport at the same time.
 
 eta, etd, flight_count, arrival_flights, bays = model.eta, model.etd, model.flight_count, model.arrival_flights, model.bays
 
-def calc_overlap_matrix():
-    if os.path.isfile('data/overlap_matrix.csv'):
+def calc_overlap_matrix(use_cache = False):
+    path = model.data_path + 'overlap_matrix.csv'
+    if use_cache and os.path.isfile(path):
         print('Loaded overlap_matrix.csv from cache')
-        return np.loadtxt('data/overlap_matrix.csv', delimiter=';')
+        return np.loadtxt(path, delimiter=';')
 
     C = np.zeros((flight_count, flight_count), dtype=int)
 
@@ -28,7 +29,7 @@ def calc_overlap_matrix():
                       (etd[i] <= etd[j] and etd[i] >= eta[j]) or \
                       (etd[i] >= etd[j] and eta[i] <= eta[j])
 
-    np.savetxt('data/overlap_matrix.csv', C, delimiter=';', fmt='%s')
+    np.savetxt(path, C, delimiter=';', fmt='%s')
     return C
 
 
@@ -88,14 +89,15 @@ def write_to_file():
 
 def solve():
     print('Solving...')
-    with open("results/lp_result.txt", "w") as f:
-        result = subprocess.call('lp_solve results/problem.lp', shell=True, stdout=f)
+    with open(model.results_path + 'lp_result.txt', 'w') as f:
+        problem_path = model.results_path + 'problem.lp'
+        result = subprocess.call('lp_solve {}'.format(problem_path), shell=True, stdout=f)
 
     return result
 
 
 def process_results():
-    with open("results/lp_result.txt", "r") as f:
+    with open(model.results_path + 'lp_result.txt', 'r') as f:
         x = re.findall("X.* .*1", f.read())
         assignments = np.zeros((len(x), 2), dtype=int)
 
@@ -104,11 +106,9 @@ def process_results():
             flight = int(x[1])
             bay = x[2][:-1].strip()
             bay_index = bays.index(bay)
-
-            print('Flight {} is assigned to bay {}'.format(flight, bay))
             assignments[flight] = [flight, bay_index]
     
-    np.savetxt('results/assignment_result.csv', assignments, delimiter=';', fmt='%s')
+    np.savetxt(model.results_path + 'assignment_result.csv', assignments, delimiter=';', fmt='%s')
 
 
 write_to_file()

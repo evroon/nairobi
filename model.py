@@ -3,16 +3,33 @@ import numpy as np
 bays = ['20', '19', '18', '17', '16', '15', '14', '13', '12', '11', '10', '9', '8', '7', '6', '5', '4L', '4R', '3C', '3B', '3A',
         '2C', '2B', '2A', 'J1', 'J2A', 'J2B', 'J3A', 'J3B', 'J4A', 'J4B', 'J5', 'J6', 'J7', 'J8', 'J9', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6']
 
-dataset = '02_06_2015_proc.csv'
+dataset = '02_06_2015'
+dataset = '05_07_2015'
 
-airline_preferences = np.genfromtxt('data/airline_preferences.csv', delimiter=';', dtype="|U16")
-bay_compliance      = np.genfromtxt('data/bay_compliance.csv',      delimiter=';')
-flight_info_float   = np.genfromtxt('data/flights/' + dataset,      delimiter=';')
-flight_info_text    = np.genfromtxt('data/flights/' + dataset,      delimiter=';', dtype="|U16")
+buffer = 15 # minutes
 
+data_path = 'data/' + dataset + '/'
+results_path = data_path + '/results/'
+success = False
+
+try:
+    airline_preferences = np.genfromtxt('data/general/airline_preferences.csv', delimiter=';', dtype="|U16")
+    bay_compliance      = np.genfromtxt('data/general/bay_compliance.csv',      delimiter=';')
+    flight_info_float   = np.genfromtxt(data_path + 'flights_processed.csv', delimiter=';')
+    flight_info_text    = np.genfromtxt(data_path + 'flights_processed.csv', delimiter=';', dtype="|U16")
+
+    success = True
+except Exception as e:
+    print('Could not open data file: ' + str(e))
+
+if success:
 pax = flight_info_float[1:, 10]
 eta = flight_info_float[1:, 3]
 etd = flight_info_float[1:, 7]
+    flight_count = len(pax)
+
+    eta = np.maximum(eta - buffer / 60.0, 0.0)
+    etd = np.minimum(etd + buffer / 60.0, 24.0)
 
 arrival_flights = flight_info_text[1:, 1]
 departure_flights = flight_info_text[1:, 5]
