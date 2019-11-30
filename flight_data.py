@@ -63,6 +63,7 @@ def process_data(filename):
     Set the ETA and ETD correctly
     '''
 
+    np.random.seed(2)
     data = np.genfromtxt(filename, delimiter=';', dtype="|U16")
 
     first_index = np.asarray([0])

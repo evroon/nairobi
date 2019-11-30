@@ -79,6 +79,17 @@ def write_to_file():
         if len(constraint_elements) > 0:
             result += ' + '.join(constraint_elements) + ' = 0;\n'
 
+    # Fueling availability constraint
+    for i in range(flight_count):
+        if model.aircraft_has_to_be_fueled(i):
+            constraint_elements = []
+            
+            for k in bays:
+                if model.bay_supports_fueling(k):
+                    constraint_elements.append('X_{i}_{k}'.format(i=i, k=k))
+
+            result += ' + '.join(constraint_elements) + ' = 1;\n'
+
     # Xik is binary
     result += 'bin '
     binary_variables = []

@@ -13,10 +13,11 @@ results_path = data_path + '/results/'
 success = False
 
 try:
-    airline_preferences = np.genfromtxt('data/general/airline_preferences.csv', delimiter=';', dtype="|U16")
-    bay_compliance      = np.genfromtxt('data/general/bay_compliance.csv',      delimiter=';')
-    flight_info_float   = np.genfromtxt(data_path + 'flights_processed.csv', delimiter=';')
-    flight_info_text    = np.genfromtxt(data_path + 'flights_processed.csv', delimiter=';', dtype="|U16")
+    airline_preferences     = np.genfromtxt('data/general/airline_preferences.csv', delimiter=';', dtype="|U16")
+    bay_compliance          = np.genfromtxt('data/general/bay_compliance.csv',      delimiter=';')
+    fueling_availability    = np.genfromtxt('data/general/fueling_availability.csv', delimiter=';')
+    flight_info_float       = np.genfromtxt(data_path + 'flights_processed.csv', delimiter=';')
+    flight_info_text        = np.genfromtxt(data_path + 'flights_processed.csv', delimiter=';', dtype="|U16")
     
     success = True
 except Exception as e:
@@ -31,6 +32,7 @@ if success:
     eta = np.maximum(eta - buffer / 60.0, 0.0)
     etd = np.minimum(etd + buffer / 60.0, 24.0)
 
+    flight_types = flight_info_text[1:, 0]
     arrival_flights = flight_info_text[1:, 1]
     departure_flights = flight_info_text[1:, 5]
     ac_class = flight_info_text[1:, 9]
@@ -58,3 +60,10 @@ def flight_has_preference(flight, bay):
 
     preferred_bay = airline_preferences[preference_index[0][0], 2]
     return int(bay == preferred_bay)
+
+def bay_supports_fueling(bay):
+    bay_index = bays.index(bay)
+    return bool(fueling_availability[bay_index + 1, 1])
+
+def aircraft_has_to_be_fueled(aircraft):
+    return flight_types[aircraft] in ['Full', 'Dep']
