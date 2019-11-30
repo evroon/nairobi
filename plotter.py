@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 import model
 
 
-eta, etd, flight_count = model.get_basic_flight_info()
-callsigns = model.get_callsigns()
+eta, etd, flight_count, arrival_flights = model.eta, model.etd, model.flight_count, model.arrival_flights
 
 fig, gnt = plt.subplots(figsize=(18, 16))
 gnt.set_ylim(0, len(model.bays))
@@ -26,7 +25,7 @@ assignments = np.genfromtxt('results/assignment_result.csv', delimiter=';')
 for i, _ in enumerate(eta):
     _, bay = assignments[i]
     rgba = cmap(i / flight_count)
-    gnt.broken_barh([(eta[i], etd[i] - eta[i])], (bay, 1), facecolors=rgba, label=callsigns[i])
+    gnt.broken_barh([(eta[i], etd[i] - eta[i])], (bay, 1), facecolors=rgba, label=arrival_flights[i])
 
 plt.legend(bbox_to_anchor=(1.08, 1.01))
 plt.savefig('results/gantt.png', bbox_inches='tight')

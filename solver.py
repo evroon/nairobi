@@ -13,13 +13,13 @@ Constants:
 Overlap matrix Cij: 1 if aircraft i and j are at the airport at the same time.
 '''
 
+eta, etd, flight_count, arrival_flights, bays = model.eta, model.etd, model.flight_count, model.arrival_flights, model.bays
 
 def calc_overlap_matrix():
     if os.path.isfile('data/overlap_matrix.csv'):
         print('Loaded overlap_matrix.csv from cache')
         return np.loadtxt('data/overlap_matrix.csv', delimiter=';')
 
-    eta, etd, flight_count = model.get_basic_flight_info()
     C = np.zeros((flight_count, flight_count), dtype=int)
 
     for i in range(flight_count):
@@ -39,7 +39,7 @@ def write_to_file():
     result = 'max: 0;\n'
 
     # Time slot constraints: Xik + Xjk <= 1
-    for k in model.bays:
+    for k in bays:
         for i in range(flight_count):
             for j in range(flight_count):
                 if C[i, j] == 1:
@@ -48,25 +48,25 @@ def write_to_file():
     # Single bay constraint: sum of Xik is equal to 1 for all k corresponding to a suitable bay
     # Aircraft has to park somewhere
     for i in range(flight_count):
-        for k in model.bays[:-1]:
+        for k in bays[:-1]:
             if model.ac_can_park_at_bay(i, k):
                 result += 'X_{i}_{k} + '.format(i=i, k=k)
 
-        result += 'X_{i}_{k} = 1;\n'.format(i=i, k=model.bays[-1])
+        result += 'X_{i}_{k} = 1;\n'.format(i=i, k=bays[-1])
 
     # Single bay constraint: sum of Xik is equal to 0 for all k corresponding to a unsuitable bay
     # Aircraft cannot park at unsuitable bays
     for i in range(flight_count):
-        for k in model.bays[:-1]:
+        for k in bays[:-1]:
             if not model.ac_can_park_at_bay(i, k):
                 result += 'X_{i}_{k} + '.format(i=i, k=k)
 
-        result += 'X_{i}_{k} = 0;\n'.format(i=i, k=model.bays[-1])
+        result += 'X_{i}_{k} = 0;\n'.format(i=i, k=bays[-1])
 
     # Xik is binary
     result += 'bin'
     for i in range(flight_count):
-        for k in model.bays:
+        for k in bays:
             result += ' X_{i}_{k}'.format(i=i, k=k)
 
     result += ';\n'
@@ -92,7 +92,7 @@ def process_results():
             x = a.split('_')
             flight = int(x[1])
             bay = x[2][:-1].strip()
-            bay_index = model.bays.index(bay)
+            bay_index = bays.index(bay)
 
             print('Flight {} is assigned to bay {}'.format(flight, bay))
             assignments[flight] = [flight, bay_index]
