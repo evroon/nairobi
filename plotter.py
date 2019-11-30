@@ -5,8 +5,9 @@ import model
 
 
 eta, etd, flight_count = model.get_flight_info()
+callsigns = model.get_callsigns()
 
-fig, gnt = plt.subplots()
+fig, gnt = plt.subplots(figsize=(18, 16))
 gnt.set_ylim(0, len(model.bays))
 gnt.set_xlim(0, 24)
 
@@ -23,9 +24,11 @@ assignments = np.genfromtxt('results/assignment_result.csv', delimiter=';')
 
 # Plot Gantt diagram
 for i, _ in enumerate(eta):
-    flight, bay = assignments[i]
+    _, bay = assignments[i]
+    callsign = callsigns[i]
     rgba = cmap(i / flight_count)
-    gnt.broken_barh([(eta[i], etd[i] - eta[i])], (bay, 1), facecolors=rgba, label=flight)
+    gnt.broken_barh([(eta[i], etd[i] - eta[i])], (bay, 1), facecolors=rgba, label=callsign)
 
-plt.legend()
+plt.legend(bbox_to_anchor=(1.07, 1.01))
+plt.savefig('results/gantt.png')
 plt.show()
