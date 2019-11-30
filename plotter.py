@@ -2,6 +2,7 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 import model
+from collections import OrderedDict
 
 
 eta, etd, flight_count, arrival_flights = model.eta, model.etd, model.flight_count, model.arrival_flights
@@ -20,9 +21,9 @@ time_ticks = [str(x) + ':00' for x in np.arange(0, 24)]
 gnt.set_xticks(np.arange(0, 24))
 gnt.set_xticklabels(time_ticks)
 
-gnt.grid(True)
+gnt.yaxis.grid()
 
-cmap = plt.cm.get_cmap('Spectral')
+cmap = plt.cm.get_cmap('winter_r')
 
 assignments = np.genfromtxt(model.results_path + 'assignment_result.csv', delimiter=';')
 
@@ -33,9 +34,18 @@ if len(assignments) < 1:
 # Plot Gantt diagram
 for i, _ in enumerate(eta):
     _, bay = assignments[i]
-    rgba = cmap(i / flight_count)
-    gnt.broken_barh([(eta[i], etd[i] - eta[i])], (bay, 1), facecolors=rgba, label=arrival_flights[i])
+    ac_class = model.ac_class[i]
+    rgba = cmap((ord(ac_class) - ord('A')) / (ord('G') - ord('A')))
+    gnt.broken_barh([(eta[i], etd[i] - eta[i])], (bay, 1), facecolors=rgba, label=ac_class)
 
-# plt.legend(bbox_to_anchor=(1.08, 1.01))
+handles, labels = plt.gca().get_legend_handles_labels()
+keys, values = [], []
+dict = OrderedDict(zip(labels, handles))
+
+for i in sorted(dict):
+    keys.append(i)
+    values.append(dict[i])
+
+plt.legend(values, keys, bbox_to_anchor=(1.08, 1.01))
 plt.savefig(model.results_path + 'gantt.png', bbox_inches='tight')
 plt.show()
