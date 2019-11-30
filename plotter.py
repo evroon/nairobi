@@ -24,7 +24,11 @@ gnt.grid(True)
 
 cmap = plt.cm.get_cmap('Spectral')
 
-assignments = np.genfromtxt('results/assignment_result.csv', delimiter=';')
+assignments = np.genfromtxt(model.results_path + 'assignment_result.csv', delimiter=';')
+
+if len(assignments) < 1:
+    print('Problem is infeasible!')
+    quit()
 
 # Plot Gantt diagram
 for i, _ in enumerate(eta):
