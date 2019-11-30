@@ -36,7 +36,16 @@ def write_to_file():
     C = calc_overlap_matrix()
     flight_count = np.shape(C)[0]
 
-    result = 'max: 0;\n'
+    result = 'max: '
+
+    # Objective function
+    objective_elements = []
+    for k in bays:
+        for i in range(flight_count):
+            preference = model.flight_has_preference(i, k)
+            objective_elements.append('{p} X_{i}_{k}'.format(i=i, k=k, p=preference))
+
+    result += ' + '.join(objective_elements) + ';\n'
 
     # Time slot constraints: Xik + Xjk <= 1
     for k in bays:
