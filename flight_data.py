@@ -1,0 +1,81 @@
+import csv
+import numpy as np
+import matplotlib.pyplot as plt
+import model
+
+A = ['AT4', 'AT7', 'Q400']
+B = ['B733', 'E70']
+C = ['E90']
+D = ['B737', 'B738', 'A320']
+E = ['B73J']
+F = ['B787', 'B788', 'A330', 'B767']
+G = ['B772', 'B773']
+H = ['B747']
+
+types = {
+    'AT4': 'A',
+    'AT7': 'A',
+    'CRJ': 'A',
+    '733': 'B',
+    'E70': 'B',
+    'E90': 'C',
+    '737': 'D',
+    '738': 'D',
+    '320': 'D',
+    '73J': 'E',
+    '787': 'F',
+    '788': 'F',
+    '330': 'F',
+    '332': 'F',
+    '767': 'F',
+    '772': 'G',
+    '773': 'G',
+    '747': 'H',
+}
+
+passengers = {
+    'AT4': 52,
+    'AT7': 72,
+    'CRJ': 90,
+    '733': 126,
+    'E70': 72,
+    'E90': 96,
+    '737': 126,
+    '73J': 126,
+    '738': 162,
+    '320': 150,
+    '767': 200,
+    '787': 234,
+    '788': 234,
+    '332': 233,
+    '330': 268,
+    '772': 302,
+    '773': 385,
+    '747': 429,
+}
+
+
+def process_data(filename):
+    '''
+    Add two columns with aircraft class and passenger data
+    '''
+
+    data = np.genfromtxt(filename, delimiter=';', dtype="|U16")[:, :]
+    result = np.zeros((data.shape[0], data.shape[1] + 2), dtype="|U16")
+    result[:, :-2] = data
+
+    for ac in range(1, result.shape[0]):
+        result[ac, -2] = types[result[ac, -3]]
+        result[ac, -1] = passengers[result[ac, -3]]
+        result[ac, 3] = result[ac, 3].replace(':', '.')
+        result[ac, 7] = result[ac, 7].replace(':', '.')
+
+        if result[ac, 0] == 'Park':
+            result[ac, -1] = 0
+
+    result[0, -2] = 'Class'
+    result[0, -1] = 'Pax'
+    np.savetxt(filename[:-4] + '_proc.csv', result, delimiter=';', fmt='%s')
+
+
+process_data('data/flights/02_06_2015.csv')

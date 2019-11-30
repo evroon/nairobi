@@ -27,6 +27,6 @@ for i, _ in enumerate(eta):
     rgba = cmap(i / flight_count)
     gnt.broken_barh([(eta[i], etd[i] - eta[i])], (bay, 1), facecolors=rgba, label=arrival_flights[i])
 
-plt.legend(bbox_to_anchor=(1.08, 1.01))
+# plt.legend(bbox_to_anchor=(1.08, 1.01))
 plt.savefig('results/gantt.png', bbox_inches='tight')
 plt.show()
