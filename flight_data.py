@@ -13,6 +13,7 @@ G = ['B772', 'B773']
 H = ['B747']
 
 types = {
+    'Q40': 'A',
     'AT4': 'A',
     'AT7': 'A',
     'CRJ': 'A',
@@ -34,6 +35,7 @@ types = {
 }
 
 passengers = {
+    'Q40': 40,
     'AT4': 52,
     'AT7': 72,
     'CRJ': 90,
@@ -60,7 +62,7 @@ def process_data(filename):
     Add two columns with aircraft class and passenger data
     '''
 
-    data = np.genfromtxt(filename, delimiter=';', dtype="|U16")[:, :]
+    data = np.genfromtxt(filename, delimiter=';', dtype="|U16")[::2, :]
     result = np.zeros((data.shape[0], data.shape[1] + 2), dtype="|U16")
     result[:, :-2] = data
 
@@ -87,7 +89,7 @@ def process_data(filename):
 
     result[0, -2] = 'Class'
     result[0, -1] = 'Pax'
-    np.savetxt(filename[:-4] + '_proc.csv', result, delimiter=';', fmt='%s')
+    np.savetxt(filename[:-4] + '_processed.csv', result, delimiter=';', fmt='%s')
 
 
-process_data('data/flights/02_06_2015.csv')
+process_data('data/' + model.dataset + '/flights.csv')

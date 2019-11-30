@@ -37,5 +37,5 @@ for i, _ in enumerate(eta):
     gnt.broken_barh([(eta[i], etd[i] - eta[i])], (bay, 1), facecolors=rgba, label=arrival_flights[i])
 
 # plt.legend(bbox_to_anchor=(1.08, 1.01))
-plt.savefig('results/gantt.png', bbox_inches='tight')
+plt.savefig(model.results_path + 'gantt.png', bbox_inches='tight')
 plt.show()
