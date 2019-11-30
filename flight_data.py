@@ -60,9 +60,16 @@ passengers = {
 def process_data(filename):
     '''
     Add two columns with aircraft class and passenger data
+    Set the ETA and ETD correctly
     '''
 
-    data = np.genfromtxt(filename, delimiter=';', dtype="|U16")[::2, :]
+    data = np.genfromtxt(filename, delimiter=';', dtype="|U16")
+
+    first_index = np.asarray([0])
+    data_length = data.shape[0]
+    indices = np.append(first_index, np.random.randint(1, data_length, int(data_length * 0.7) - 1))
+    data = data[indices, :]
+
     result = np.zeros((data.shape[0], data.shape[1] + 2), dtype="|U16")
     result[:, :-2] = data
 
