@@ -17,25 +17,24 @@ try:
     bay_compliance      = np.genfromtxt('data/general/bay_compliance.csv',      delimiter=';')
     flight_info_float   = np.genfromtxt(data_path + 'flights_processed.csv', delimiter=';')
     flight_info_text    = np.genfromtxt(data_path + 'flights_processed.csv', delimiter=';', dtype="|U16")
-
+    
     success = True
 except Exception as e:
     print('Could not open data file: ' + str(e))
 
 if success:
-pax = flight_info_float[1:, 10]
-eta = flight_info_float[1:, 3]
-etd = flight_info_float[1:, 7]
+    pax = flight_info_float[1:, 10]
+    eta = flight_info_float[1:, 3]
+    etd = flight_info_float[1:, 7]
     flight_count = len(pax)
 
     eta = np.maximum(eta - buffer / 60.0, 0.0)
     etd = np.minimum(etd + buffer / 60.0, 24.0)
 
-arrival_flights = flight_info_text[1:, 1]
-departure_flights = flight_info_text[1:, 5]
-ac_class = flight_info_text[1:, 9]
+    arrival_flights = flight_info_text[1:, 1]
+    departure_flights = flight_info_text[1:, 5]
+    ac_class = flight_info_text[1:, 9]
 
-flight_count = len(eta)
 
 # Check whether an aircraft can park at a certain bay,
 # where bay is the name of a bay (not an index) and

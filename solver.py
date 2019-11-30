@@ -34,54 +34,59 @@ def calc_overlap_matrix(use_cache = False):
 
 
 def write_to_file():
-    f = open('results/problem.lp', 'w+')
+    f = open(model.results_path + 'problem.lp', 'w+')
 
     C = calc_overlap_matrix()
     flight_count = np.shape(C)[0]
 
-    result = 'max: '
-
     # Objective function
+    result = 'max: '
     objective_elements = []
     for k in bays:
         for i in range(flight_count):
-            preference = model.flight_has_preference(i, k)
-            objective_elements.append('{p} X_{i}_{k}'.format(i=i, k=k, p=preference))
+            if model.flight_has_preference(i, k):
+                objective_elements.append('X_{i}_{k}'.format(i=i, k=k))
 
     result += ' + '.join(objective_elements) + ';\n'
 
-    # Time slot constraints: Xik + Xjk <= 1
+    # Time slot constraints: Xik + Xjk <= 1, i != j
     for k in bays:
         for i in range(flight_count):
-            for j in range(flight_count):
+            for j in range(i + 1, flight_count):
                 if C[i, j] == 1:
                     result += 'X_{i}_{k} + X_{j}_{k} <= 1;\n'.format(i=i, j=j, k=k)
 
     # Single bay constraint: sum of Xik is equal to 1 for all k corresponding to a suitable bay
     # Aircraft has to park somewhere
     for i in range(flight_count):
-        for k in bays[:-1]:
-            if model.ac_can_park_at_bay(i, k):
-                result += 'X_{i}_{k} + '.format(i=i, k=k)
+        constraint_elements = []
 
-        result += 'X_{i}_{k} = 1;\n'.format(i=i, k=bays[-1])
+        for k in bays:
+            if model.ac_can_park_at_bay(i, k):
+                constraint_elements.append('X_{i}_{k}'.format(i=i, k=k))
+
+        result += ' + '.join(constraint_elements) + ' = 1;\n'
 
     # Single bay constraint: sum of Xik is equal to 0 for all k corresponding to a unsuitable bay
     # Aircraft cannot park at unsuitable bays
     for i in range(flight_count):
-        for k in bays[:-1]:
-            if not model.ac_can_park_at_bay(i, k):
-                result += 'X_{i}_{k} + '.format(i=i, k=k)
+        constraint_elements = []
 
-        result += 'X_{i}_{k} = 0;\n'.format(i=i, k=bays[-1])
+        for k in bays:
+            if not model.ac_can_park_at_bay(i, k):
+                constraint_elements.append('X_{i}_{k}'.format(i=i, k=k))
+
+        if len(constraint_elements) > 0:
+            result += ' + '.join(constraint_elements) + ' = 0;\n'
 
     # Xik is binary
-    result += 'bin'
+    result += 'bin '
+    binary_variables = []
     for i in range(flight_count):
         for k in bays:
-            result += ' X_{i}_{k}'.format(i=i, k=k)
+            binary_variables.append('X_{i}_{k}'.format(i=i, k=k))
 
-    result += ';\n'
+    result += ', '.join(binary_variables) + ';\n'
 
     f.write(result)
     f.close()
@@ -105,7 +110,7 @@ def process_results():
             x = a.split('_')
             flight = int(x[1])
             bay = x[2][:-1].strip()
-            bay_index = bays.index(bay)
+            bay_index = bays.index(bay)            
             assignments[flight] = [flight, bay_index]
     
     np.savetxt(model.results_path + 'assignment_result.csv', assignments, delimiter=';', fmt='%s')
