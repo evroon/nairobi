@@ -25,10 +25,9 @@ assignments = np.genfromtxt('results/assignment_result.csv', delimiter=';')
 # Plot Gantt diagram
 for i, _ in enumerate(eta):
     _, bay = assignments[i]
-    callsign = callsigns[i]
     rgba = cmap(i / flight_count)
-    gnt.broken_barh([(eta[i], etd[i] - eta[i])], (bay, 1), facecolors=rgba, label=callsign)
+    gnt.broken_barh([(eta[i], etd[i] - eta[i])], (bay, 1), facecolors=rgba, label=callsigns[i])
 
-plt.legend(bbox_to_anchor=(1.07, 1.01))
-plt.savefig('results/gantt.png')
+plt.legend(bbox_to_anchor=(1.08, 1.01))
+plt.savefig('results/gantt.png', bbox_inches='tight')
 plt.show()
