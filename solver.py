@@ -24,7 +24,9 @@ def calc_overlap_matrix():
 
     for i in range(flight_count):
         for j in range(flight_count):
-            C[i, j] = eta[i] < etd[j] and eta[i] > eta[j]
+            C[i, j] = (eta[i] <= etd[j] and eta[i] >= eta[j]) or \
+                      (etd[i] <= etd[j] and etd[i] >= eta[j]) or \
+                      (etd[i] >= etd[j] and eta[i] <= eta[j])
 
     np.savetxt('data/overlap_matrix.csv', C, delimiter=';', fmt='%s')
     return C

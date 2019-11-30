@@ -71,7 +71,19 @@ def process_data(filename):
         result[ac, 7] = result[ac, 7].replace(':', '.')
 
         if result[ac, 0] == 'Park':
-            result[ac, -1] = 0
+            result[ac, -1] = 0.0
+
+        eta = float(result[ac, 3])
+        etd = float(result[ac, 7])
+
+        if etd < eta:
+            result[ac, 7] = 24.0
+            etd = float(result[ac, 7])
+        
+        # Multiply minutes by 10 / 6 in order to get correct decimals
+        # (in range 0.0 to 1.0 instead of 0.0 to 0.6)
+        result[ac, 3] = '{:.2f}'.format(eta // 1 + (eta % 1) * 10.0 / 6.0)
+        result[ac, 7] = '{:.2f}'.format(etd // 1 + (etd % 1) * 10.0 / 6.0)
 
     result[0, -2] = 'Class'
     result[0, -1] = 'Pax'
