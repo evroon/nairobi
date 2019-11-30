@@ -34,7 +34,6 @@ def write_to_file():
     f = open('results/problem.lp', 'w+')
 
     C = calc_overlap_matrix()
-    C = np.reshape(C, (50, 50))
     flight_count = np.shape(C)[0]
 
     result = 'max: 0;\n'
@@ -46,12 +45,23 @@ def write_to_file():
                 if C[i, j] == 1:
                     result += 'X_{i}_{k} + X_{j}_{k} <= 1;\n'.format(i=i, j=j, k=k)
 
-    # Single bay constraint: sum of Xik is equal to 1 for all k
+    # Single bay constraint: sum of Xik is equal to 1 for all k corresponding to a suitable bay
+    # Aircraft has to park somewhere
     for i in range(flight_count):
         for k in model.bays[:-1]:
-            result += 'X_{i}_{k} + '.format(i=i, k=k)
+            if model.ac_can_park_at_bay(i, k):
+                result += 'X_{i}_{k} + '.format(i=i, k=k)
 
         result += 'X_{i}_{k} = 1;\n'.format(i=i, k=model.bays[-1])
+
+    # Single bay constraint: sum of Xik is equal to 0 for all k corresponding to a unsuitable bay
+    # Aircraft cannot park at unsuitable bays
+    for i in range(flight_count):
+        for k in model.bays[:-1]:
+            if not model.ac_can_park_at_bay(i, k):
+                result += 'X_{i}_{k} + '.format(i=i, k=k)
+
+        result += 'X_{i}_{k} = 0;\n'.format(i=i, k=model.bays[-1])
 
     # Xik is binary
     result += 'bin'
