@@ -90,6 +90,19 @@ def write_to_file():
 
             result += ' + '.join(constraint_elements) + ' = 1;\n'
 
+    # 4L can only handle a wide body (higer than class D) if 4R is empty,
+    # so the sum of all widebodies at 4L and all aircraft at 4R must be <= 1
+    widebodies_4L = []
+    for i in range(flight_count):
+        if ord(model.ac_class[i]) - ord('D') > 0:
+            widebodies_4L.append('X_{i}_4L'.format(i=i))
+
+    any_4R = []
+    for i in range(flight_count):
+        any_4R.append('X_{i}_4R'.format(i=i))
+
+    result += ' + '.join(widebodies_4L) + ' + ' + ' + '.join(any_4R) + ' <= 1;\n'    
+
     # Xik is binary
     result += 'bin '
     binary_variables = []
