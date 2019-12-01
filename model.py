@@ -29,8 +29,11 @@ if success:
     etd = flight_info_float[1:, 7]
     flight_count = len(pax)
 
-    eta = np.maximum(eta - buffer / 60.0, 0.0)
-    etd = np.minimum(etd + buffer / 60.0, 24.0)
+    eta = np.maximum(eta, 0.0)
+    etd = np.minimum(etd, 23 + 59 / 60)
+
+    eta -= buffer / 60.0
+    etd += buffer / 60.0
 
     flight_types = flight_info_text[1:, 0]
     arrival_flights = flight_info_text[1:, 1]
