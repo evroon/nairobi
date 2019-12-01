@@ -36,7 +36,12 @@ for i, _ in enumerate(eta):
     _, bay = assignments[i]
     ac_class = model.ac_class[i]
     rgba = cmap((ord(ac_class) - ord('A')) / (ord('G') - ord('A')))
-    gnt.broken_barh([(eta[i], etd[i] - eta[i])], (bay, 1), facecolors=rgba, label=ac_class)
+
+    arrival = eta[i] + model.buffer / 60.0
+    departure = etd[i] - model.buffer / 60.0
+    stay_period = departure - arrival
+
+    gnt.broken_barh([(arrival, stay_period)], (bay, 1), facecolors=rgba, label=ac_class)
 
 handles, labels = plt.gca().get_legend_handles_labels()
 keys, values = [], []
@@ -46,6 +51,6 @@ for i in sorted(dict):
     keys.append(i)
     values.append(dict[i])
 
-plt.legend(values, keys, bbox_to_anchor=(1.08, 1.01))
+plt.legend(values, keys, loc='upper left')
 plt.savefig(model.results_path + 'gantt.png', bbox_inches='tight')
 plt.show()
