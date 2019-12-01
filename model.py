@@ -15,7 +15,7 @@ success = False
 try:
     airline_preferences     = np.genfromtxt('data/general/airline_preferences.csv', delimiter=';', dtype="|U16")
     bay_compliance          = np.genfromtxt('data/general/bay_compliance.csv',      delimiter=';')
-    fueling_availability    = np.genfromtxt('data/general/fueling_availability.csv', delimiter=';')
+    fuelling_availability    = np.genfromtxt('data/general/fuelling_availability.csv', delimiter=';')
     flight_info_float       = np.genfromtxt(data_path + 'flights_processed.csv', delimiter=';')
     flight_info_text        = np.genfromtxt(data_path + 'flights_processed.csv', delimiter=';', dtype="|U16")
     
@@ -64,9 +64,9 @@ def flight_has_preference(flight, bay):
     preferred_bay = airline_preferences[preference_index[0][0], 2]
     return int(bay == preferred_bay)
 
-def bay_supports_fueling(bay):
+def bay_supports_fuelling(bay):
     bay_index = bays.index(bay)
-    return bool(fueling_availability[bay_index + 1, 1])
+    return bool(fuelling_availability[bay_index + 1, 1])
 
 def aircraft_has_to_be_fueled(aircraft):
     return flight_types[aircraft] in ['Full', 'Dep']
