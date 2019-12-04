@@ -3,15 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import model
 
-A = ['AT4', 'AT7', 'Q400']
-B = ['B733', 'E70']
-C = ['E90']
-D = ['B737', 'B738', 'A320']
-E = ['B73J']
-F = ['B787', 'B788', 'A330', 'B767']
-G = ['B772', 'B773']
-H = ['B747']
-
 types = {
     'Q40': 'A',
     'AT4': 'A',
