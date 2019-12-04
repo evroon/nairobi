@@ -13,7 +13,7 @@ Constants:
 Overlap matrix Cij: 1 if aircraft i and j are at the airport at the same time.
 '''
 
-eta, etd, flight_count, arrival_flights, bays = model.eta, model.etd, model.flight_count, model.arrival_flights, model.bays
+eta, etd, flight_count, arrival_flights, bays, gates = model.eta, model.etd, model.flight_count, model.arrival_flights, model.bays, model.gates
 
 def calc_overlap_matrix(use_cache = False):
     path = model.data_path + 'overlap_matrix.csv'
@@ -33,13 +33,13 @@ def calc_overlap_matrix(use_cache = False):
     return C
 
 
-def write_to_file():
-    f = open(model.results_path + 'problem.lp', 'w+')
+def write_bay_assignment():
+    f = open(model.results_path + 'bay_assignment.lp', 'w+')
 
     C = calc_overlap_matrix()
     flight_count = np.shape(C)[0]
 
-    # Objective function
+    # Start objective function
     result = 'max: '
     objective_elements = []
     for k in bays:
@@ -47,8 +47,20 @@ def write_to_file():
             if model.flight_has_preference(i, k):
                 objective_elements.append('X_{i}_{k}'.format(i=i, k=k))
 
-    result += ' + '.join(objective_elements) + ';\n'
+    result += ' + '.join(objective_elements)
+    result += ' - '
 
+    # Minimize passenger travel distance, use negative factors.
+    objective_elements = []
+    for k in bays:
+        for i in range(flight_count):
+            p = model.pax[i]
+            d = model.get_walking_distance(k)
+            objective_elements.append('{pd:.0f} X_{i}_{k}'.format(pd=p * d, i=i, k=k))
+
+    result += ' - '.join(objective_elements) + ';\n'
+
+    # Start constraints
     # Time slot constraints: Xik + Xjk <= 1, i != j
     for k in bays:
         for i in range(flight_count):
@@ -101,7 +113,7 @@ def write_to_file():
     for i in range(flight_count):
         any_4R.append('X_{i}_4R'.format(i=i))
 
-    result += ' + '.join(widebodies_4L) + ' + ' + ' + '.join(any_4R) + ' <= 1;\n'    
+    result += ' + '.join(widebodies_4L) + ' + ' + ' + '.join(any_4R) + ' <= 1;\n'
 
     # Xik is binary
     result += 'bin '
@@ -115,18 +127,42 @@ def write_to_file():
     f.write(result)
     f.close()
 
+    
+def write_gate_assignment():
+    with open(model.results_path + 'gate_assignment.lp', 'w+') as f:
+        result = 'min: '
 
-def solve():
-    print('Solving...')
-    with open(model.results_path + 'lp_result.txt', 'w') as f:
-        problem_path = model.results_path + 'problem.lp'
+        # Objective funcion: minimize travel distance.
+        objective_elements = []
+        for g in gates:
+            for i in range(model.flight_count):
+                objective_elements.append('Y_{i}_{g}'.format(i=i, g=g))
+
+        result += ' + '.join(objective_elements) + ';\n\n'
+
+        # Time slot constraint: A flight can be assigned to only one gate.
+        for i in range(model.flight_count):
+            constraint_elements = []
+            for g in gates:
+                constraint_elements.append('Y_{i}_{g}'.format(i=i, g=g))
+            
+            result += ' + '.join(constraint_elements) + ' = 1;\n'
+
+        f.write(result)
+
+
+
+def solve(filename):
+    print('Solving {}...'.format(filename))
+    with open(model.results_path + filename + '_result.txt', 'w') as f:
+        problem_path = model.results_path + filename + '.lp'
         result = subprocess.call('lp_solve {}'.format(problem_path), shell=True, stdout=f)
 
     return result
 
 
-def process_results():
-    with open(model.results_path + 'lp_result.txt', 'r') as f:
+def process_bay_assignment():
+    with open(model.results_path + 'bay_assignment_result.txt', 'r') as f:
         x = re.findall("X.* .*1", f.read())
         assignments = np.zeros((len(x), 2), dtype=int)
 
@@ -137,9 +173,11 @@ def process_results():
             bay_index = bays.index(bay)            
             assignments[flight] = [flight, bay_index]
     
-    np.savetxt(model.results_path + 'assignment_result.csv', assignments, delimiter=';', fmt='%s')
+    np.savetxt(model.results_path + 'bay_assignment_result.csv', assignments, delimiter=';', fmt='%s')
 
 
-write_to_file()
-solve()
-process_results()
+write_bay_assignment()
+write_gate_assignment()
+solve('bay_assignment')
+solve('gate_assignment')
+process_bay_assignment()

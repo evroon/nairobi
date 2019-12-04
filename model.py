@@ -3,6 +3,8 @@ import numpy as np
 bays = ['20', '19', '18', '17', '16', '15', '14', '13', '12', '11', '10', '9', '8', '7', '6', '5', '4L', '4R', '3C', '3B', '3A',
         '2C', '2B', '2A', 'J1', 'J2A', 'J2B', 'J3A', 'J3B', 'J4A', 'J4B', 'J5', 'J6', 'J7', 'J8', 'J9', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6']
 
+gates = np.arange(1, 24)
+
 dataset = '02_06_2015'
 dataset = '05_07_2015'
 
@@ -15,7 +17,8 @@ success = False
 try:
     airline_preferences     = np.genfromtxt('data/general/airline_preferences.csv', delimiter=';', dtype="|U16")
     bay_compliance          = np.genfromtxt('data/general/bay_compliance.csv',      delimiter=';')
-    fuelling_availability    = np.genfromtxt('data/general/fuelling_availability.csv', delimiter=';')
+    fuelling_availability   = np.genfromtxt('data/general/fuelling_availability.csv', delimiter=';')
+    walking_distance        = np.genfromtxt('data/general/walking_distance.csv', delimiter=';')
     flight_info_float       = np.genfromtxt(data_path + 'flights_processed.csv', delimiter=';')
     flight_info_text        = np.genfromtxt(data_path + 'flights_processed.csv', delimiter=';', dtype="|U16")
     
@@ -70,3 +73,7 @@ def bay_supports_fuelling(bay):
 
 def aircraft_has_to_be_fueled(aircraft):
     return flight_types[aircraft] in ['Full', 'Dep']
+
+def get_walking_distance(bay):
+    bay_index = bays.index(bay)
+    return walking_distance[bay_index + 1, 1]
