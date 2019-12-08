@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import model
 from collections import OrderedDict
 
+plt.rcParams.update({'font.size': 16})
 
 eta, etd, flight_count, arrival_flights = model.eta, model.etd, model.flight_count, model.arrival_flights
 
@@ -18,7 +19,7 @@ def setup_gantt_plot():
     gnt.set_yticks(np.arange(len(model.bays)) + 0.5)
     gnt.set_yticklabels(model.bays)
 
-    time_ticks = [str(x) + ':00' for x in np.arange(0, 24)]
+    time_ticks = [str(x) for x in np.arange(0, 24)]
     gnt.set_xticks(np.arange(0, 24))
     gnt.set_xticklabels(time_ticks)
 
