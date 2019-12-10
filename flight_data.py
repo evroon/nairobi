@@ -57,9 +57,14 @@ def process_data(filename):
     np.random.seed(3)
     data = np.genfromtxt(filename, delimiter=';', dtype="|U16")
 
+    data_usage = 0.6
+
+    if model.dataset == "02_06_2015":
+        data_usage = 0.85
+
     first_index = np.asarray([0])
     data_length = data.shape[0]
-    indices = np.append(first_index, np.random.randint(1, data_length, int(data_length * 0.6) - 1))
+    indices = np.append(first_index, np.random.randint(1, data_length, int(data_length * data_usage) - 1))
     data = data[indices, :]
 
     result = np.zeros((data.shape[0], data.shape[1] + 2), dtype="|U16")
