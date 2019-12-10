@@ -56,6 +56,8 @@ def write_bay_assignment():
         for i in range(flight_count):
             p = model.pax[i]
             d = model.get_walking_distance(k)
+
+            if p * d > 0.0:
             objective_elements.append('{pd:.0f} X_{i}_{k}'.format(pd=p * d, i=i, k=k))
 
     result += ' - '.join(objective_elements) + ';\n'
