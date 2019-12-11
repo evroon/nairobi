@@ -146,13 +146,13 @@ def write_gate_assignment():
         f.write(result)
 
 
-def solve(filename, use_lpsolve=False):
+def solve(filename):
     print('Solving {}...'.format(filename))
     with open(model.results_path + filename + '_result.txt', 'w') as f:
         problem_path = model.results_path + filename + '.lp'
         mps_path = model.results_path + filename + '.mps'
 
-        if use_lpsolve:
+        if model.use_lpsolve:
             result = subprocess.call('lp_solve {} -wfmps {}'.format(problem_path, mps_path), shell=True, stdout=f)
         else:
             result = subprocess.call('lp_solve -parse_only {} -wfmps {}'.format(problem_path, mps_path), shell=True, stdout=f)
