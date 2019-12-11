@@ -44,7 +44,7 @@ def write_bay_assignment():
     objective_elements = []
     for k in bays:
         for i in range(flight_count):
-            if model.flight_has_preference(i, k):
+            if model.flight_has_bay_preference(i, k):
                 objective_elements.append('X_{i}_{k}'.format(i=i, k=k))
 
     result += ' + '.join(objective_elements)
@@ -132,23 +132,16 @@ def write_bay_assignment():
     
 def write_gate_assignment():
     with open(model.results_path + 'gate_assignment.lp', 'w+') as f:
-        result = 'min: '
+        result = 'max: '
 
-        # Objective funcion: minimize travel distance.
+        # Objective function: maximize airline preferences.
         objective_elements = []
-        for g in gates:
-            for i in range(model.flight_count):
-                objective_elements.append('Y_{i}_{g}'.format(i=i, g=g))
+        for g in gate:
+            for i in range(flight_count):
+                if model.flight_has_gate_preference(i, g):
+                    objective_elements.append('X_{i}_{g}'.format(i=i, g=g))
 
-        result += ' + '.join(objective_elements) + ';\n\n'
-
-        # Time slot constraint: A flight can be assigned to only one gate.
-        for i in range(model.flight_count):
-            constraint_elements = []
-            for g in gates:
-                constraint_elements.append('Y_{i}_{g}'.format(i=i, g=g))
-            
-            result += ' + '.join(constraint_elements) + ' = 1;\n'
+        result += ' + '.join(objective_elements) + ';'
 
         f.write(result)
 

@@ -57,15 +57,26 @@ def ac_can_park_at_bay(flight, bay):
 # Check whether an aircraft is obeying the preference of its airline,
 # where bay is the name of a bay (not an index) and
 # where flight is the index of a flight
-def flight_has_preference(flight, bay):
+def flight_has_bay_preference(flight, bay):
     dep = departure_flights[flight]
     preference_index = np.argwhere(airline_preferences[:, 0] == dep)
 
     if len(preference_index) < 1:
         return 0
 
-    preferred_bay = airline_preferences[preference_index[0][0], 2]
-    return int(bay == preferred_bay)
+    preferred_bay = airline_preferences[preference_index[0][0], 2].split(',')
+    return int(bay in preferred_bay)
+
+
+def flight_has_gate_preference(flight, gate):
+    dep = departure_flights[flight]
+    preference_index = np.argwhere(airline_preferences[:, 0] == dep)
+
+    if len(preference_index) < 1:
+        return 0
+
+    preferred_gates = airline_preferences[preference_index[0][0], 3].split(',')
+    return int(gate in preferred_gates)
 
 def bay_supports_fuelling(bay):
     bay_index = bays.index(bay)
