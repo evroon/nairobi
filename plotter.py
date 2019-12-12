@@ -1,6 +1,7 @@
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from matplotlib.colors import ListedColormap
 import model
 from collections import OrderedDict
@@ -8,18 +9,6 @@ from collections import OrderedDict
 plt.rcParams.update({'font.size': 16})
 
 eta, etd, flight_count, arrival_flights = model.eta, model.etd, model.flight_count, model.arrival_flights
-
-
-def set_legend():
-    handles, labels = plt.gca().get_legend_handles_labels()
-    keys, values = [], []
-    dict = OrderedDict(zip(labels, handles))
-
-    for i in sorted(dict):
-        keys.append(i)
-        values.append(dict[i])
-
-    plt.legend(values, keys, loc='upper left')
 
 
 def setup_gantt_plot():
@@ -62,11 +51,20 @@ def plot_bay_assignment():
 
         gnt.broken_barh([(arrival, stay_period)], (bay, 1), facecolors=rgba, label=ac_class)
 
-    set_legend()
+    # Set legend
+    handles, labels = plt.gca().get_legend_handles_labels()
+    keys, values = [], []
+    dict = OrderedDict(zip(labels, handles))
+
+    for i in sorted(dict):
+        keys.append(i)
+        values.append(dict[i])
+
+    plt.legend(values, keys, loc='upper left')
     plt.savefig(model.results_path + 'bay_assignment.png', bbox_inches='tight')
 
 def plot_gate_assignment():
-    gnt, cmap = setup_gantt_plot()
+    gnt, _ = setup_gantt_plot()
     assignments = np.genfromtxt(model.results_path + 'gate_assignment_result.csv', delimiter=';')
 
     gnt.set_ylabel('Gate')
@@ -82,13 +80,19 @@ def plot_gate_assignment():
     for i, _ in enumerate(eta):
         _, gate = assignments[i]
         ac_class = model.ac_class[i]
-        rgba = cmap((ord(ac_class) - ord('A')) / (ord('G') - ord('A')))
 
         arrival = eta[i] + model.buffer / 60.0
         departure = etd[i] - model.buffer / 60.0
         stay_period = departure - arrival
 
         gnt.broken_barh([(arrival, stay_period)], (gate - 1, 1), facecolors=[0, 0, 1, 0.5], label=ac_class)
+
+    # Set legend
+    custom_lines = [
+        Line2D([0], [0], color='w', marker='s', label='Scatter', markerfacecolor=[0, 0, 1, 0.5], markersize=15),
+        Line2D([0], [0], color='w', marker='s', label='Scatter', markerfacecolor=[0, 0, 1, 1.0], markersize=15)
+    ]
+    plt.legend(custom_lines, ['1 flight', '2 flights'], loc='upper left')
     
     plt.savefig(model.results_path + 'gate_assignment.png', bbox_inches='tight')
 
