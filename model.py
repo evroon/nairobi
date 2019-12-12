@@ -76,7 +76,7 @@ def flight_has_gate_preference(flight, gate):
         return 0
 
     preferred_gates = airline_preferences[preference_index[0][0], 3].split(',')
-    return int(gate in preferred_gates)
+    return int(str(gate) in preferred_gates)
 
 def bay_supports_fuelling(bay):
     bay_index = bays.index(bay)
