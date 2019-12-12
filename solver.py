@@ -182,14 +182,15 @@ def write_gate_assignment():
 
 def solve(filename, use_lpsolve):
     print('Solving {}...'.format(filename))
-    with open(model.results_path + filename + '_result.txt', 'w') as f:
-        problem_path = model.results_path + filename + '.lp'
-        mps_path = model.results_path + filename + '.mps'
+    
+    problem_path = model.results_path + filename + '.lp'
+    mps_path = model.results_path + filename + '.mps'
 
-        if use_lpsolve:
+    if use_lpsolve:
+        with open(model.results_path + filename + '_result.txt', 'w') as f:
             result = subprocess.call('lp_solve -f {} -wfmps {}'.format(problem_path, mps_path), shell=True, stdout=f)
-        else:
-            result = subprocess.call('lp_solve -parse_only {} -wfmps {}'.format(problem_path, mps_path), shell=True, stdout=f)
+    else:
+        result = subprocess.call('lp_solve -parse_only {} -wfmps {}'.format(problem_path, mps_path), shell=True, stdout=False)
 
     return result
 
