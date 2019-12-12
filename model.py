@@ -8,8 +8,6 @@ gates = np.arange(1, 24)
 dataset = '02_06_2015'
 dataset = '05_07_2015'
 
-use_lpsolve = False
-
 buffer = 15 # minutes
 
 data_path = 'data/' + dataset + '/'
