@@ -142,20 +142,31 @@ def write_gate_assignment():
                 if model.flight_has_gate_preference(i, g):
                     objective_elements.append('Y_{i}_{g}'.format(i=i, g=g))
 
-        result += ' + '.join(objective_elements) + ' - '
+        result += ' + '.join(objective_elements) + ' -'
 
         # Objective funcion: minimize multiple flights at same gate.
         objective_elements = []
         for g in gates:
-            objective_elements.append('k_{g}'.format(g=g))
+            for i in range(model.flight_count):
+                for j in range(model.flight_count):
+                    objective_elements.append('k_{i}_{j}_{g}'.format(i=i, j=j, g=g))
 
         result += ' - '.join(objective_elements) + ';\n'
 
-        # # Constraint: Write variables k_g as a soft constraint.
+        # Constraint: Write variables k_g as a soft constraint.
         for g in gates:
             for i in range(model.flight_count):
                 for j in range(model.flight_count):
-                    result += 'Y_{i}_{g} + Y_{j}_{g}'.format(i=i, j=j, g=g) + ' - k_{g} <= 1;\n'.format(g=g)
+                    if C[i, j] == 1:
+                        result += 'Y_{i}_{g} + Y_{j}_{g} - k_{i}_{j}_{g} <= 1;\n'.format(i=i, j=j, g=g)
+
+        # Constraint: flight must use exactly one gate.
+        for i in range(model.flight_count):
+            constraint_elements = []
+            for g in gates:
+                constraint_elements.append('Y_{i}_{g}'.format(i=i, g=g))
+        
+            result += ' + '.join(constraint_elements) + ' = 1;\n'
 
         # Yik is binary
         result += 'bin '
@@ -185,5 +196,5 @@ def solve(filename):
 
 write_bay_assignment()
 write_gate_assignment()
-# solve('bay_assignment')
+solve('bay_assignment')
 solve('gate_assignment')
