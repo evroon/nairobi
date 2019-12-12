@@ -1,7 +1,6 @@
 import numpy as np
 import subprocess
 import os
-import re
 import model
 
 
@@ -58,7 +57,7 @@ def write_bay_assignment():
             d = model.get_walking_distance(k)
 
             if p * d > 0.0:
-            objective_elements.append('{pd:.0f} X_{i}_{k}'.format(pd=p * d, i=i, k=k))
+                objective_elements.append('{pd:.0f} X_{i}_{k}'.format(pd=p * d, i=i, k=k))
 
     result += ' - '.join(objective_elements) + ';\n'
 
@@ -131,17 +130,41 @@ def write_bay_assignment():
 
     
 def write_gate_assignment():
+    C = calc_overlap_matrix()
+
     with open(model.results_path + 'gate_assignment.lp', 'w+') as f:
         result = 'max: '
 
         # Objective function: maximize airline preferences.
         objective_elements = []
-        for g in gate:
+        for g in gates:
             for i in range(flight_count):
                 if model.flight_has_gate_preference(i, g):
-                    objective_elements.append('X_{i}_{g}'.format(i=i, g=g))
+                    objective_elements.append('Y_{i}_{g}'.format(i=i, g=g))
 
-        result += ' + '.join(objective_elements) + ';'
+        result += ' + '.join(objective_elements) + ' - '
+
+        # Objective funcion: minimize multiple flights at same gate.
+        objective_elements = []
+        for g in gates:
+            objective_elements.append('k_{g}'.format(g=g))
+
+        result += ' - '.join(objective_elements) + ';\n'
+
+        # # Constraint: Write variables k_g as a soft constraint.
+        for g in gates:
+            for i in range(model.flight_count):
+                for j in range(model.flight_count):
+                    result += 'Y_{i}_{g} + Y_{j}_{g}'.format(i=i, j=j, g=g) + ' - k_{g} <= 1;\n'.format(g=g)
+
+        # Yik is binary
+        result += 'bin '
+        binary_variables = []
+        for i in range(flight_count):
+            for g in gates:
+                binary_variables.append('Y_{i}_{g}'.format(i=i, g=g))
+
+        result += ', '.join(binary_variables) + ';\n'
 
         f.write(result)
 
@@ -153,30 +176,14 @@ def solve(filename):
         mps_path = model.results_path + filename + '.mps'
 
         if model.use_lpsolve:
-            result = subprocess.call('lp_solve {} -wfmps {}'.format(problem_path, mps_path), shell=True, stdout=f)
+            result = subprocess.call('lp_solve -f {} -wfmps {}'.format(problem_path, mps_path), shell=True, stdout=f)
         else:
             result = subprocess.call('lp_solve -parse_only {} -wfmps {}'.format(problem_path, mps_path), shell=True, stdout=f)
 
     return result
 
 
-def process_bay_assignment():
-    with open(model.results_path + 'bay_assignment_result.txt', 'r') as f:
-        x = re.findall("X.* .*1", f.read())
-        assignments = np.zeros((len(x), 2), dtype=int)
-
-        for a in x:
-            x = a.split('_')
-            flight = int(x[1])
-            bay = x[2][:-1].strip()
-            bay_index = bays.index(bay)            
-            assignments[flight] = [flight, bay_index]
-    
-    np.savetxt(model.results_path + 'bay_assignment_result.csv', assignments, delimiter=';', fmt='%s')
-
-
 write_bay_assignment()
 write_gate_assignment()
-solve('bay_assignment')
+# solve('bay_assignment')
 solve('gate_assignment')
-process_bay_assignment()
