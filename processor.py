@@ -5,7 +5,7 @@ import re
 bays, gates = model.bays, model.gates
 
 
-def process_bay_assignment():
+def process_bay_assignment_cplex():
     with open(model.results_path + 'bay_assignment.sol', 'r') as f:
         expression = '<variable name="(.*)" index="(.*)" value="1"/>'
         vars = re.findall(expression, f.read())
@@ -21,19 +21,18 @@ def process_bay_assignment():
     np.savetxt(model.results_path + 'bay_assignment_result.csv', assignments, delimiter=';', fmt='%s')
 
 
-def process_gate_assignment():
-    with open(model.results_path + 'gate_assignment_result.sol', 'r') as f:
-        expression = '<variable name="(.*)" index="(.*)" value="(.*)"/>'
-        x = re.findall(expression, f.read())
-        assignments = np.zeros((len(x), 2), dtype=int)
+def process_gate_assignment_lpsolve():
+    with open(model.results_path + 'gate_assignment_result.txt', 'r') as f:
+        expression = 'Y_(.*)_(.*)[" "]{10,}1'
+        vars = re.findall(expression, f.read())
+        assignments = np.zeros((len(vars), 2), dtype=int)
 
-        for a in x:
-            x = a.split('_')
-            flight = int(x[1])
-            gate = x[2][:-1].strip()
+        for a in vars:
+            flight = int(a[0])
+            gate = a[1].strip()
             assignments[flight] = [flight, gate]
     
     np.savetxt(model.results_path + 'gate_assignment_result.csv', assignments, delimiter=';', fmt='%s')
     
-process_bay_assignment()
-# process_gate_assignment()
+process_bay_assignment_cplex()
+process_gate_assignment_lpsolve()
