@@ -33,6 +33,20 @@ def process_gate_assignment_lpsolve():
             assignments[flight] = [flight, gate]
     
     np.savetxt(model.results_path + 'gate_assignment_result.csv', assignments, delimiter=';', fmt='%s')
+
+def add_solutions_to_flight_data():
+    gate_assignments = np.genfromtxt(model.results_path + 'gate_assignment_result.csv', delimiter=';', dtype="|U16")[:, 1]
+    bay_assignments = np.genfromtxt(model.results_path + 'bay_assignment_result.csv', delimiter=';', dtype="|U16")[:, 1]
+
+    data = open(model.data_path + "flights_processed.csv", "r").read().split('\n')
+
+    for i, _ in enumerate(data[1:-1]):
+        data[i+1] += ';' + gate_assignments[i] + ';' + bay_assignments[i]
+
+    output = data[0] + ';Gate;Bay\n' + '\n'.join(data[1:-1])
+    open(model.results_path + 'result.csv', 'w').write(output)
     
 process_bay_assignment_cplex()
 process_gate_assignment_lpsolve()
+
+add_solutions_to_flight_data()
