@@ -41,11 +41,11 @@ def add_solutions_to_flight_data():
     data = open(model.data_path + "flights_processed.csv", "r").read().split('\n')
 
     for i, _ in enumerate(data[1:-1]):
-        pref_gate = model.flight_has_gate_preference(gate_assignments[i]])
-        pref_bay = model.flight_has_bay_preference(bays[int(bay_assignments[i])])
-        data[i+1] += ';' + gate_assignments[i] + ';' + bays[int(bay_assignments[i])] + ';' + pref_gate + ';' + pref_bay
+        pref_gate = str(model.flight_has_gate_preference(i, gate_assignments[i]))
+        pref_bay = str(model.flight_has_bay_preference(i, bays[int(bay_assignments[i])]))
+        data[i+1] += ';' + bays[int(bay_assignments[i])] + ';' + gate_assignments[i] + ';' + pref_bay + ';' + pref_gate
 
-    output = data[0] + ';Gate;Bay;Pref. Gate; Pref. Bay\n' + '\n'.join(data[1:-1])
+    output = data[0] + ';Bay;Gate;Pref. Bay; Pref. Gate\n' + '\n'.join(data[1:-1])
     open(model.results_path + 'result.csv', 'w').write(output)
     
 process_bay_assignment_cplex()
